@@ -54,15 +54,56 @@ int grausCDDAtual = grauInicialServo;
 int pinoTrigger = 2;
 int pinoEcho = 3;
 
-long duracao;
-int distancia;
+unsigned long duracao;
+unsigned long distancia;
 bool objetoDetectado = false;
 int distanciaNecessariaObstaculoCabeca = 10;
 int quantidadeNecessariaDetectarObstaculo = 3;
 int contadorObjetoDetectado = 0;
 bool deteccaoObjetoLiberada = true;
+int delayDetectarObstaculo = 300;
 
 bool movimentarServos = true;
+
+unsigned long tempoAtual;
+
+unsigned long tempoRecebimentoSerial;
+float delayRecebimentoSerial = 200;
+String valorRecebidoCompleto;
+bool resetado;
+
+int passoAtualPDE = 0;
+int passoAtualCDE = 0;
+int passoAtualPTE = 0;
+int passoAtualCTE = 0;
+int passoAtualPDD = 0;
+int passoAtualCDD = 0;
+int passoAtualPTD = 0;
+int passoAtualCTD = 0;
+
+int qtdeMovimentos = 5;
+int delayMov = 200;
+long delayPassos = 0;
+
+int movimentacaoPDE[] = { 80, 50, 50, 50, 80 };
+int delayPDE[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
+int movimentacaoCDE[] = { 105, 65, 65, 65, 105 };
+int delayCDE[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
+
+int movimentacaoPTE[] = { 90, 90, 110, 110, 90 };
+int delayPTE[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
+int movimentacaoCTE[] = { 90, 90, 115, 80, 90 };
+int delayCTE[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
+
+int movimentacaoPDD[] = { 130, 100, 100, 130, 130 };
+int delayPDD[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
+int movimentacaoCDD[] = { 115, 65, 65, 115, 115 };
+int delayCDD[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
+
+int movimentacaoPTD[] = { 70, 70, 90, 90, 90 };
+int delayPTD[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
+int movimentacaoCTD[] = { 100, 90, 90, 90, 90 };
+int delayCTD[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
 
 void setup() {
 	Serial.begin(9600);
@@ -74,7 +115,7 @@ void setup() {
 
 	timer.setTimeout(3000, iniciarMovimentoPata);
 
-	timer.setInterval(300, detectarObstaculoCabeca);
+	timer.setTimeout(delayDetectarObstaculo, detectarObstaculoCabeca);
 }
 
 void detectarObstaculoCabeca() {
@@ -125,6 +166,8 @@ void detectarObstaculoCabeca() {
 
 		movimentarServos = true;
 	}
+
+	timer.setTimeout(delayDetectarObstaculo, detectarObstaculoCabeca);
 }
 
 void inicializarServos() {
@@ -172,39 +215,6 @@ void reiniciarServos() {
 	grausPDD = grauInicialServo;
 	grausCDD = grauInicialServo;
 }
-
-int passoAtualPDE = 0;
-int passoAtualCDE = 0;
-int passoAtualPTE = 0;
-int passoAtualCTE = 0;
-int passoAtualPDD = 0;
-int passoAtualCDD = 0;
-int passoAtualPTD = 0;
-int passoAtualCTD = 0;
-
-int qtdeMovimentos = 5;
-int delayMov = 200;
-long delayPassos = 0;
-
-int movimentacaoPDE[] = { 80, 50, 50, 50, 80 };
-int delayPDE[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
-int movimentacaoCDE[] = { 105, 65, 65, 65, 105 };
-int delayCDE[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
-
-int movimentacaoPTE[] = { 90, 90, 110, 110, 90 };
-int delayPTE[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
-int movimentacaoCTE[] = { 90, 90, 115, 80, 90 };
-int delayCTE[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
-
-int movimentacaoPDD[] = { 130, 100, 100, 130, 130 };
-int delayPDD[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
-int movimentacaoCDD[] = { 115, 65, 65, 115, 115 };
-int delayCDD[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
-
-int movimentacaoPTD[] = { 70, 70, 90, 90, 90 };
-int delayPTD[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
-int movimentacaoCTD[] = { 100, 90, 90, 90, 90 };
-int delayCTD[] = { delayMov, delayMov, delayMov, delayMov, delayMov };
 
 void iniciarMovimentoPata() {
 	movimentarPDE();
@@ -373,13 +383,6 @@ void atualizarServo(int& grausAtual, int graus, Servo& servo) {
 		delay(3);
 	}
 }
-
-unsigned long tempoAtual;
-
-unsigned long tempoRecebimentoSerial;
-float delayRecebimentoSerial = 200;
-String valorRecebidoCompleto;
-bool resetado;
 
 void construirValorRecebido()
 {
